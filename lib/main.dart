@@ -23,7 +23,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  List<Widget> _tasks = <Widget>[];
+  List<TaskCard> _tasks = <TaskCard>[];
   int cnt = 0;
   String _limitText = '';
   List<DropdownMenuItem<int>> _items = [];
@@ -68,6 +68,11 @@ class _MyHomePageState extends State<MyHomePage>
         value: 4,
       ));
   }
+
+  Comparator<TaskCard> comparator = (a, b) =>
+      a.limitDate.compareTo(b.limitDate) == 0
+          ? a.priority.compareTo(b.priority)
+          : a.limitDate.compareTo(b.limitDate);
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +151,6 @@ class _MyHomePageState extends State<MyHomePage>
                       !_limitEditController.text.isEmpty &&
                       !_priorityEditController.text.isEmpty)
                     {
-                      _tasks.add(Divider()),
                       _tasks.add(TaskCard(
                           _titleEditController.text,
                           _limitEditController.text,
@@ -155,7 +159,9 @@ class _MyHomePageState extends State<MyHomePage>
                         _titleEditController.text = '';
                         _limitEditController.text = '';
                         _priorityEditController.text = '';
+                        _selectItem = 1;
                       }),
+                      _tasks.sort(comparator),
                       Navigator.pop(context),
                     }
                 },
