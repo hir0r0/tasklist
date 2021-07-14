@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:tasklist/db_provider.dart';
+import 'package:tasklist/task_card_entity.dart';
 import 'task_card.dart';
 
 void main() => runApp(MyApp());
@@ -27,7 +30,8 @@ class _MyHomePageState extends State<MyHomePage>
   int cnt = 0;
   String _limitText = '';
   List<DropdownMenuItem<int>> _items = [];
-  var _selectItem = 1;
+  late int _selectItem;
+  late TaskCardEntity entity;
 
   TextEditingController _titleEditController = TextEditingController();
   TextEditingController _limitEditController = TextEditingController();
@@ -39,6 +43,15 @@ class _MyHomePageState extends State<MyHomePage>
     setItems();
     _selectItem = _items[0].value!;
     _priorityEditController.text = "1";
+    Future<List<TaskCardEntity>> list = DBProvider().selectAll();
+    list.asStream().forEach((entities) {
+      for (entity in entities) {
+        TaskCard card = TaskCard(entity);
+        _tasks.add(card);
+        setState(() {});
+      }
+    });
+    _tasks.sort(comparator);
   }
 
   void setItems() {
@@ -96,81 +109,91 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void _addTasK() {
-    // _items.add(Divider());
-    // TaskCard task =
-    //     new TaskCard('タスク' + cnt.toString(), '2021/06/20', '00:00', 0);
-    // _items.add(task);
-    // cnt++;
-    // setState(() {});
     showDialog(
       context: context,
-      builder: (context) => Column(
-        children: <Widget>[
-          AlertDialog(
-            title: Text("ダイアログ"),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  TextField(
-                    decoration:
-                        InputDecoration(hintText: "タイトル", labelText: 'タイトル'),
-                    maxLength: 20,
-                    controller: _titleEditController,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return Column(
+            children: <Widget>[
+              AlertDialog(
+                title: Text("ダイアログ"),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      TextField(
+                        decoration: InputDecoration(
+                            hintText: "タイトル", labelText: 'タイトル'),
+                        maxLength: 20,
+                        controller: _titleEditController,
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                          hintText: "yyyy/mm/dd",
+                          labelText: '期限',
+                        ),
+                        controller: _limitEditController,
+                        onTap: () => _selectDate(context),
+                        readOnly: true,
+                      ),
+                      DropdownButton(
+                          items: _items,
+                          value: _selectItem,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectItem = int.parse(value.toString());
+                              _priorityEditController.text =
+                                  _selectItem.toString();
+                            });
+                          }),
+                    ],
                   ),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "yyyy/mm/dd",
-                      labelText: '期限',
-                    ),
-                    controller: _limitEditController,
-                    onTap: () => _selectDate(context),
-                    readOnly: true,
+                ),
+                actions: <Widget>[
+                  // ボタン領域
+                  TextButton(
+                    child: Text("Cancel"),
+                    onPressed: onPressedCancel,
                   ),
-                  DropdownButton(
-                      items: _items,
-                      value: _selectItem,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectItem = int.parse(value.toString());
-                          _priorityEditController.text = _selectItem.toString();
-                        });
-                      }),
+                  TextButton(
+                    child: Text("OK"),
+                    onPressed: onPressedOk,
+                  ),
                 ],
               ),
-            ),
-            actions: <Widget>[
-              // ボタン領域
-              TextButton(
-                child: Text("Cancel"),
-                onPressed: () => Navigator.pop(context),
-              ),
-              TextButton(
-                child: Text("OK"),
-                onPressed: () => {
-                  if (!_titleEditController.text.isEmpty &&
-                      !_limitEditController.text.isEmpty &&
-                      !_priorityEditController.text.isEmpty)
-                    {
-                      _tasks.add(TaskCard(
-                          _titleEditController.text,
-                          _limitEditController.text,
-                          _priorityEditController.text)),
-                      setState(() {
-                        _titleEditController.text = '';
-                        _limitEditController.text = '';
-                        _priorityEditController.text = '';
-                        _selectItem = 1;
-                      }),
-                      _tasks.sort(comparator),
-                      Navigator.pop(context),
-                    }
-                },
-              ),
             ],
-          ),
-        ],
-      ),
+          );
+        });
+      },
     );
+  }
+
+  void onPressedCancel() {
+    setState(() {
+      _selectItem = 1;
+    });
+    Navigator.pop(context);
+  }
+
+  void onPressedOk() {
+    if (_titleEditController.text.isNotEmpty &&
+        _limitEditController.text.isNotEmpty &&
+        _priorityEditController.text.isNotEmpty) {
+      entity = TaskCardEntity(
+          id: 0,
+          taskName: _titleEditController.text,
+          limitDate: _limitEditController.text,
+          priority: _priorityEditController.text);
+      _tasks.add(TaskCard(entity));
+      DBProvider().insertTaskCard(entity);
+      setState(() {
+        _titleEditController.text = '';
+        _limitEditController.text = '';
+        _priorityEditController.text = '';
+        _selectItem = 1;
+      });
+      _tasks.sort(comparator);
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -185,11 +208,15 @@ class _MyHomePageState extends State<MyHomePage>
       setState(() {
         _limitText = selected.year.toString() +
             "/" +
-            selected.month.toString() +
+            zeroPadding(selected.month.toString()) +
             "/" +
-            selected.day.toString();
+            zeroPadding(selected.day.toString());
         _limitEditController.text = _limitText;
       });
     }
+  }
+
+  String zeroPadding(String str) {
+    return str.length == 1 ? "0" + str : str;
   }
 }
