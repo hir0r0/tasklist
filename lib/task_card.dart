@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:tasklist/task_card_entity.dart';
-import 'package:tasklist/db_provider.dart';
 
 // ignore: must_be_immutable
 class TaskCard extends StatefulWidget {
-  late TaskCardEntity _entity;
+  late int id;
   String taskName = '';
   String limitDate = '';
   String priority = '';
 
   TaskCard(TaskCardEntity entity) {
-    this._entity = entity;
+    this.id = entity.id;
     this.taskName = entity.taskName;
     this.limitDate = entity.limitDate;
     this.priority = entity.priority;
@@ -24,55 +22,17 @@ class TaskCard extends StatefulWidget {
 class _TaskCardState extends State<TaskCard> {
   @override
   Widget build(Object context) {
-    return Slidable(
-      actionPane: SlidableScrollActionPane(),
-      actions: <Widget>[
-        IconSlideAction(
-          caption: 'Done',
-          color: Colors.green,
-          icon: Icons.check,
-          onTap: _delete,
-        ),
-        IconSlideAction(
-          caption: 'Delete',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: _delete,
-        ),
-        IconSlideAction(
-          caption: 'Close',
-          color: Colors.grey,
-          icon: Icons.close,
-          onTap: () => {},
-        ),
-      ],
-      secondaryActions: [
-        IconSlideAction(
-          caption: 'Done',
-          color: Colors.green,
-          icon: Icons.check,
-          onTap: _delete,
-        ),
-        IconSlideAction(
-          caption: 'Delete',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: _delete,
-        ),
-        IconSlideAction(
-          caption: 'Close',
-          color: Colors.grey,
-          icon: Icons.close,
-          onTap: () => {},
-        ),
-      ],
-      actionExtentRatio: 1 / 7,
+    return Card(
+      shape: RoundedRectangleBorder(
+        // side: BorderSide(color: Colors.white70, width: 0),
+        borderRadius: BorderRadius.circular(0),
+      ),
+      color: toConvColor(widget.priority),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Divider(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
@@ -96,6 +56,21 @@ class _TaskCardState extends State<TaskCard> {
     );
   }
 
+  Color toConvColor(String priority) {
+    switch (priority) {
+      case '1':
+        return Colors.red.shade100;
+      case '2':
+        return Colors.orange.shade100;
+      case '3':
+        return Colors.lightGreen.shade200;
+      case '4':
+        return Colors.lightBlue.shade100;
+      default:
+        return Colors.white;
+    }
+  }
+
   String toPriorityString(String priority) {
     switch (priority) {
       case '1':
@@ -109,11 +84,5 @@ class _TaskCardState extends State<TaskCard> {
       default:
         return '　無';
     }
-  }
-
-  void _delete() {
-    // this._entity
-    // DBProvider().deleteTaskCard(this._entity);
-    setState() => {};
   }
 }

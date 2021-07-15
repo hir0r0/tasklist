@@ -27,17 +27,20 @@ class DBProvider {
     );
   }
 
-  Future<void> insertTaskCard(TaskCardEntity task) async {
+  Future<int> insertTaskCard(TaskCardEntity task) async {
+    int id = -1;
     try {
       final Database db = await database;
-      await db.insert(
+      id = await db.insert(
         'task',
         task.toMap(),
         conflictAlgorithm: ConflictAlgorithm.fail,
       );
+      task.id = id;
     } catch (e) {
       print(e);
     }
+    return id;
   }
 
   Future<void> deleteTaskCard(TaskCardEntity task) async {
@@ -47,6 +50,19 @@ class DBProvider {
         'task',
         where: "id = ?",
         whereArgs: [task.id],
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> deleteTaskCardById(int id) async {
+    try {
+      final Database db = await database;
+      await db.delete(
+        'task',
+        where: "id = ?",
+        whereArgs: [id],
       );
     } catch (e) {
       print(e);

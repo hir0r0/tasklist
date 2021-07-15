@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'package:tasklist/db_provider.dart';
 import 'package:tasklist/task_card_entity.dart';
@@ -48,10 +49,10 @@ class _MyHomePageState extends State<MyHomePage>
       for (entity in entities) {
         TaskCard card = TaskCard(entity);
         _tasks.add(card);
-        setState(() {});
       }
+      _tasks.sort(comparator);
+      setState(() {});
     });
-    _tasks.sort(comparator);
   }
 
   void setItems() {
@@ -92,13 +93,73 @@ class _MyHomePageState extends State<MyHomePage>
     return Scaffold(
       appBar: AppBar(
         title: Text('Task List'),
+        backgroundColor: Colors.grey,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: _tasks,
-        ),
+      body: ListView.builder(
+        itemCount: _tasks.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Slidable(
+            actionPane: SlidableScrollActionPane(),
+            actions: <Widget>[
+              IconSlideAction(
+                caption: 'Done',
+                color: Colors.green,
+                icon: Icons.check,
+                onTap: () => {
+                  DBProvider().deleteTaskCardById(_tasks[index].id),
+                  _tasks.removeAt(index),
+                  setState(() {}),
+                },
+              ),
+              IconSlideAction(
+                caption: 'Delete',
+                color: Colors.red,
+                icon: Icons.delete,
+                onTap: () => {
+                  DBProvider().deleteTaskCardById(_tasks[index].id),
+                  _tasks.removeAt(index),
+                  setState(() {}),
+                },
+              ),
+              IconSlideAction(
+                caption: 'Close',
+                color: Colors.grey,
+                icon: Icons.close,
+                onTap: () => {},
+              ),
+            ],
+            secondaryActions: [
+              IconSlideAction(
+                caption: 'Done',
+                color: Colors.green,
+                icon: Icons.check,
+                onTap: () => {
+                  DBProvider().deleteTaskCardById(_tasks[index].id),
+                  _tasks.removeAt(index),
+                  setState(() {}),
+                },
+              ),
+              IconSlideAction(
+                caption: 'Delete',
+                color: Colors.red,
+                icon: Icons.delete,
+                onTap: () => {
+                  DBProvider().deleteTaskCardById(_tasks[index].id),
+                  _tasks.removeAt(index),
+                  setState(() {}),
+                },
+              ),
+              IconSlideAction(
+                caption: 'Close',
+                color: Colors.grey,
+                icon: Icons.close,
+                onTap: () => {},
+              ),
+            ],
+            actionExtentRatio: 1 / 6,
+            child: Container(child: _tasks[index]),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTasK,
@@ -169,7 +230,10 @@ class _MyHomePageState extends State<MyHomePage>
 
   void onPressedCancel() {
     setState(() {
-      _selectItem = 1;
+      _titleEditController.text = '';
+      _limitEditController.text = '';
+      _priorityEditController.text = '';
+      _selectItem = _items[0].value!;
     });
     Navigator.pop(context);
   }
@@ -183,16 +247,18 @@ class _MyHomePageState extends State<MyHomePage>
           taskName: _titleEditController.text,
           limitDate: _limitEditController.text,
           priority: _priorityEditController.text);
-      _tasks.add(TaskCard(entity));
-      DBProvider().insertTaskCard(entity);
-      setState(() {
-        _titleEditController.text = '';
-        _limitEditController.text = '';
-        _priorityEditController.text = '';
-        _selectItem = 1;
+      DBProvider().insertTaskCard(entity).then((val) {
+        entity.id = val;
+        _tasks.add(TaskCard(entity));
+        setState(() {
+          _titleEditController.text = '';
+          _limitEditController.text = '';
+          _priorityEditController.text = '';
+          _selectItem = _items[0].value!;
+        });
+        _tasks.sort(comparator);
+        Navigator.pop(context);
       });
-      _tasks.sort(comparator);
-      Navigator.pop(context);
     }
   }
 
