@@ -1,5 +1,5 @@
 class TaskCardEntity {
-  late int id;
+  int id;
   String taskName;
   String limitDate;
   String priority;
@@ -11,12 +11,7 @@ class TaskCardEntity {
       required this.priority});
 
   Map<String, dynamic> toMap() {
-    return {
-      // 'id': id,
-      'taskName': taskName,
-      'limitDate': limitDate,
-      'priority': priority
-    };
+    return {'taskName': taskName, 'limitDate': limitDate, 'priority': priority};
   }
 
   factory TaskCardEntity.fromMap(Map<String, dynamic> json) => TaskCardEntity(
