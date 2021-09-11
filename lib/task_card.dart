@@ -24,32 +24,37 @@ class _TaskCardState extends State<TaskCard> {
   Widget build(Object context) {
     return Card(
       shape: RoundedRectangleBorder(
-        // side: BorderSide(color: Colors.white70, width: 0),
-        borderRadius: BorderRadius.circular(0),
+        borderRadius: BorderRadius.circular(10),
       ),
-      color: toConvColor(widget.priority),
+      // color: toConvColor(widget.priority),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(widget.taskName, style: TextStyle(fontSize: 22.0)),
-            ],
+          Padding(
+            padding: EdgeInsets.fromLTRB(10, 5, 10, 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(widget.limitDate, style: TextStyle(fontSize: 15.0)),
+                // Text(toPriorityString(widget.priority),
+                //     style: TextStyle(fontSize: 10.0)),
+              ],
+            ),
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(widget.limitDate, style: TextStyle(fontSize: 18.0)),
-              Text(toPriorityString(widget.priority),
-                  style: TextStyle(fontSize: 18.0)),
-            ],
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 2, 10, 5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(widget.taskName, style: TextStyle(fontSize: 22.0)),
+              ],
+            ),
           ),
         ],
       ),
@@ -63,7 +68,7 @@ class _TaskCardState extends State<TaskCard> {
       case '2':
         return Colors.orange.shade100;
       case '3':
-        return Colors.lightGreen.shade200;
+        return Colors.lightGreen.shade100;
       case '4':
         return Colors.lightBlue.shade100;
       default:
